@@ -12,74 +12,67 @@ NOCOLORTEXT='\033[0m'
 # Here are the dependencies
 GIT_DEPS="git"
 SDK_DEPS="cmake gcc-arm-none-eabi gcc g++"
-# These are for advanced debugging, not installed by default
+# openocd might be for advanced debugging, not installed by default
 # OPENOCD_DEPS="gdb-multiarch automake autoconf build-essential texinfo libtool libftdi-dev libusb-1.0-0-dev"
-# I don't want VSCODE
+# I don't want vscode stuff
 # VSCODE_DEPS="wget"
 UART_DEPS="minicom"
 
+MISSING_PACKAGES=""
 for PACKAGE_CATEGORY in GIT SDK UART
 do
-	# -e allows \n to print a new line
-	echo -e "\n ---  $PACKAGE_CATEGORY Dependencies "
-	# This creates a new variable name by adding _DEPS to the end
-	PACKAGE_VARIABLE="${PACKAGE_CATEGORY}_DEPS"
-	# The ! turns the string variable name into an actual variable
-	for PACKAGE in ${!PACKAGE_VARIABLE}
-	do
-		OUTPUT_STRING="$PACKAGE"
-		# ${#VARIABLE_NAME} gives string length
-		while [ ${#OUTPUT_STRING} -lt 20 ];
+		# -e allows \n to print a new line
+		echo -e "\n ---  $PACKAGE_CATEGORY Dependencies "
+		# This creates a new variable name by adding _DEPS to the end
+		PACKAGE_VARIABLE="${PACKAGE_CATEGORY}_DEPS"
+		# The ! turns the string variable name into an actual variable
+		for PACKAGE in ${!PACKAGE_VARIABLE}
 		do
-			# While string is too short, add a char to end
-			OUTPUT_STRING="${OUTPUT_STRING}_"
+				OUTPUT_STRING="$PACKAGE"
+				# ${#VARIABLE_NAME} gives string length
+				while [ ${#OUTPUT_STRING} -lt 20 ];
+				do
+						# While string is too short, add a char to end
+						OUTPUT_STRING="${OUTPUT_STRING}-"
+				done
+				# Now check if that package is installed
+				if command -v "$PACKAGE" >/dev/null 2>&1;
+				then
+						printf "${NOCOLORTEXT}${OUTPUT_STRING}${GREENTEXT}[Installed]\n${NOCOLORTEXT}"
+				else
+						printf "${NOCOLORTEXT}${OUTPUT_STRING}${REDTEXT}[ Missing ]\n${NOCOLORTEXT}"
+						# If the missing packages variable is empty
+						if [ ${#PACKAGE} -eq 0 ];
+						then
+								MISSING_PACKAGES="${PACKAGE}"
+						else
+								MISSING_PACKAGES="${MISSING_PACKAGES} ${PACKAGE}"
+						fi
+				fi
 		done
-		# Now check if that package is installed
-		if command -v "$PACKAGE" >/dev/null 2>&1;
-		then
-			printf "${NOCOLORTEXT}${OUTPUT_STRING}${GREENTEXT}[Installed]\n${NOCOLORTEXT}"
-		else
-			printf "${NOCOLORTEXT}${OUTPUT_STRING}${REDTEXT}[ Missing ]\n${NOCOLORTEXT}"
-		fi
-	done
 done
 # Ask if they would like to install these
-echo Would you to install these packages? [Y/n
-read INSTALL_ESSENTIAL
-if [ "$INSTALL_ESSENTIAL" = "y" ] || [ "$INSTALL_ESSENTIAL" = "Y" ];
+printf "\nWould you to install these packages? [Y/n] "
+read USER_INPUT
+printf "\n"
+if [ "$USER_INPUT" = "y" ] || [ "$USER_INPUT" = "Y" ];
 then
-	INSTALL_ESSENTIAL=1
+		INSTALL_ESSENTIAL=1
 else
-	INSTALL_ESSENTIAL=0
+		INSTALL_ESSENTIAL=0
 fi
-if [ INSTALL_ESSENTIAL -eq 1 ];
+
+# Now ask about the git stuff
+echo There are also git repos made by Raspberry that can be downloaded
+ESSENTIAL_REPOS="pico-sdk picoprobe picotool"
+OPTIONAL_REPOS="pico-examples pico-playground pico-extras"
+for
+
+# Now install everything
+# Install apt packages
+if [ $INSTALL_ESSENTIAL -eq 1 ];
 then
 		# Install things that aren't yet installed
-
-# Ask user what they want to install
-# echo
-# echo The following are required for pico C++ development
-# echo --- git Dependencies ---
-# echo git
-# echo --- SDK Dependencies ---
-# echo cmake
-# echo gcc-arm-none-eabi
-# echo gcc
-# echo g++
-# echo --- OpenOCD Dependencies ---
-# echo gdb-multiarch
-# echo automake
-# echo autoconf
-# echo build-essential
-# echo texinfo
-# echo libtool
-# echo libftdi-dev
-# echo libusb-1.0-0-dev
-# echo --- wget Dependencies ---
-# echo wget
-# echo --- UART Dependencies ---
-# echo minicom
-# echo
-
-
-#
+		echo $MISSING_PACKAGES
+fi
+# Install git repos
