@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Here are all the colours
+T_BLACK='\033[0;30m'
+T_RED='\033[0;31m'
+T_GREEN='\033[0;32m'
+T_ORANGE='\033[0;33m'       # Brown/Orange
+T_BLUE='\033[0;34m'
+T_PURPLE='\033[0;35m'
+T_CYAN='\033[0;36m'
+T_LIGHTGRAY='\033[0;37m'
+# These are bold
+T_DARKGRAY='\033[1;30m'
+T_LIGHTRED='\033[1;31m'
+T_LIGHTGREEN='\033[1;32m'
+T_YELLOW='\033[1;33m'
+T_LIGHTBLUE='\033[1;34m'
+T_LIGHTPURPLE='\033[1;35m'
+T_LIGHTCYAN='\033[1;36m'
+T_WHITE='\033[1;37m'
+# These are italics
+T_IBLACK='\033[3;30m'
+T_IRED='\033[3;31m'
+T_IGREEN='\033[3;32m'
+T_IORANGE='\033[3;33m'       # Brown/Orange
+T_IBLUE='\033[3;34m'
+T_IPURPLE='\033[3;35m'
+T_ICYAN='\033[3;36m'
+T_ILIGHTGRAY='\033[3;37m'
+
+T_NOCOLOR='\033[0m'         # To reset color
+
+# Printing examples
+printf "\n${T_RED}This is red${T_YELLOW} and this is yellow${T_NOCOLOR}\n\n"
+
+echo Here are all the colors
+for COLORNAME in BLACK RED GREEN ORANGE BLUE PURPLE CYAN LIGHTGRAY DARKGRAY LIGHTRED LIGHTGREEN YELLOW LIGHTBLUE LIGHTPURPLE LIGHTCYAN WHITE IBLACK IRED IGREEN IORANGE IBLUE IPURPLE ICYAN ILIGHTGRAY
+do
+    COLORVAR="T_${COLORNAME}"
+    COLORVAR=${!COLORVAR}
+    printf "${COLORVAR}This is ${COLORNAME}${T_NOCOLOR}\n"
+done
