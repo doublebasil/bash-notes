@@ -113,7 +113,6 @@ if command -v "git" >/dev/null 2>&1; then
 		for REPO_TYPE in ESSENTIAL OPTIONAL; do
 			REPO_VARIABLE="${REPO_TYPE}_REPOS"
 			for REPO in ${!REPO_VARIABLE}; do
-				echo $REPO
 				while [ 1 -eq 1 ]; do
 					printf "\n${REPO}"
 					if [ "${REPO}" = "picotool" ]; then
@@ -139,18 +138,36 @@ if command -v "git" >/dev/null 2>&1; then
 				done
 			done
 		done
-		echo Ill download ${GIT_REPO_LIST}
-		echo "installing non picotool was $INSTALLING_NON_PICOTOOL"
 	fi
 	if [ ${INSTALL_GIT_REPOS} -ne 0 ]; then
 		# Ask where to install the repos
 		if [ $INSTALL_GIT_REPOS -eq 3 ]; then
 			# If the only repo is picotool we don't need a
 			if [ $INSTALLING_NON_PICOTOOL -eq 1 ]; then
-				echo WHere do you wanty it
+				while [ 1 -eq 1 ]; do
+					echo "Provide a directory to clone git repos or leave blank to use current directory"
+					read USER_INPUT
+					if [[ -d "${USER_INPUT}" ]]; then
+						GIT_REPO_DESTINATION=USER_INPUT
+						break
+					elif [[ ${#USER_INPUT} -eq 0 ]]; then
+						GIT_REPO_DESTINATION=$PWD
+						break
+					fi
+				done
 			fi
 		else
-			echo where do ya wanna git clone to
+			while [ 1 -eq 1 ]; do
+				echo "Provide a directory to clone git repos or leave blank to use current directory"
+				read USER_INPUT
+				if [[ -d "${USER_INPUT}" ]]; then
+					GIT_REPO_DESTINATION=USER_INPUT
+					break
+				elif [[ ${#USER_INPUT} -eq 0 ]]; then
+					GIT_REPO_DESTINATION=$PWD
+					break
+				fi
+			done
 		fi
 	fi
 else
@@ -169,11 +186,11 @@ then
 fi
 # Install git repos
 if [ $INSTALL_GIT_REPOS -eq 1 ]; then # Install all
-	printf "${T_BYELLOW}Installing repos with git${T_NOCOLOR}"
+	printf "${T_BYELLOW}Installing repos with git${T_NOCOLOR}\n"
 elif [ $INSTALL_GIT_REPOS -eq 2 ]; then # Install essential
-	printf "${T_BYELLOW}Installing repos with git${T_NOCOLOR}"
+	printf "${T_BYELLOW}Installing repos with git${T_NOCOLOR}\n"
 
 elif [ $INSTALL_GIT_REPOS -eq 3 ]; then # Install custom
-	printf "${T_BYELLOW}Installing repos with git${T_NOCOLOR}"
+	printf "${T_BYELLOW}Installing repos with git${T_NOCOLOR}\n"
 
 fi
