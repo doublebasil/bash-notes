@@ -108,9 +108,12 @@ if command -v "git" >/dev/null 2>&1; then
 	done
 	# If user selected custom, allow them to select the repos
 	if [ ${INSTALL_GIT_REPOS} -eq 3 ]; then
-		$GIT_REPO_LIST=""
+		GIT_REPO_LIST=""
+		INSTALLING_NON_PICOTOOL=0
 		for REPO_TYPE in ESSENTIAL OPTIONAL; do
+			REPO_VARIABLE="${REPO_TYPE}_REPOS"
 			for REPO in ${!REPO_VARIABLE}; do
+				echo $REPO
 				while [ 1 -eq 1 ]; do
 					printf "\n${REPO}"
 					if [ "${REPO}" = "picotool" ]; then
@@ -123,6 +126,9 @@ if command -v "git" >/dev/null 2>&1; then
 					printf "\nInstall this repo? [Y/n] "
 					read USER_INPUT
 					if [ ${USER_INPUT} = "y" ] || [ ${USER_INPUT} = "Y" ]; then
+						if [ "$REPO" != "picotool" ]; then
+							INSTALLING_NON_PICOTOOL=1
+						fi
 						GIT_REPO_LIST="${GIT_REPO_LIST} ${REPO}"
 						break
 					elif [ ${USER_INPUT} = "n" ] || [ ${USER_INPUT} = "N" ]; then
@@ -134,10 +140,18 @@ if command -v "git" >/dev/null 2>&1; then
 			done
 		done
 		echo Ill download ${GIT_REPO_LIST}
+		echo "installing non picotool was $INSTALLING_NON_PICOTOOL"
 	fi
 	if [ ${INSTALL_GIT_REPOS} -ne 0 ]; then
-		if [] # YOU WERE HEREEREREREEEEEEEEEEEEEEEEEEEEEEEEE CHECK FOR CUSTOM INSTALLING PICOTOOL
 		# Ask where to install the repos
+		if [ $INSTALL_GIT_REPOS -eq 3 ]; then
+			# If the only repo is picotool we don't need a
+			if [ $INSTALLING_NON_PICOTOOL -eq 1 ]; then
+				echo WHere do you wanty it
+			fi
+		else
+			echo where do ya wanna git clone to
+		fi
 	fi
 else
 	printf "\n${T_RED}WARNING - Git not installed so cannot install repos${T_NOCOLOR}\n"
