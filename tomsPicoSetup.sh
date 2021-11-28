@@ -4,10 +4,11 @@
 # The comments are to remind me how I made it
 # I'm half just making it to learn how to use bash
 
-# These are for changing text color, colors are bold
+# These are for changing text color, colors with 1 before ; are bold
 T_RED='\033[1;31m'
 T_GREEN='\033[1;32m'
-T_YELLOW='\033[1;33m'
+T_BYELLOW='\033[1;33m'
+T_YELLOW='\033[0;33m'
 T_NOCOLOR='\033[0m'
 
 # Here are the dependencies
@@ -37,14 +38,12 @@ do
 			OUTPUT_STRING="${OUTPUT_STRING}-"
 		done
 		# Now check if that package is installed
-		if command -v "$PACKAGE" >/dev/null 2>&1;
-		then
+		if command -v "$PACKAGE" >/dev/null 2>&1; then
 			printf "${OUTPUT_STRING}${T_GREEN}[Installed]\n${T_NOCOLOR}"
 		else
 			printf "${OUTPUT_STRING}${T_RED}[ Missing ]\n${T_NOCOLOR}"
 			# If the missing packages variable is empty
-			if [ ${#PACKAGE} -eq 0 ];
-			then
+			if [ ${#PACKAGE} -eq 0 ]; then
 					MISSING_PACKAGES="${PACKAGE}"
 			else
 					MISSING_PACKAGES="${MISSING_PACKAGES} ${PACKAGE}"
@@ -56,32 +55,90 @@ done
 printf "\nWould you to install missing packages? [Y/n] "
 read USER_INPUT
 printf "\n"
-if [ "$USER_INPUT" = "y" ] || [ "$USER_INPUT" = "Y" ];
-then
+if [ "$USER_INPUT" = "y" ] || [ "$USER_INPUT" = "Y" ]; then
 	INSTALL_APT_PACKAGES=1
 else
 	INSTALL_APT_PACKAGES=0
 fi
+printf "\n"
 
 # Now ask about the git stuff
-if command -v "git" >/dev/null 2>&1;
-then
+if command -v "git" >/dev/null 2>&1; then
 	echo There are also git repos made by Raspberry that can be downloaded
 	ESSENTIAL_REPOS="pico-sdk picotool"
 	OPTIONAL_REPOS="pico-examples pico-playground pico-extras picoprobe"
-	for REPO_TYPE in ESSENTIAL OPTIONAL
-	do
-		echo -e "\n --- $REPO_TYPE Repositories"
-		REPO_VARIABLE="${REPO_TYPE}_REPOS"
-		for REPO in ${!REPO_VARIABLE}
-		do
-			printf "${REPO}\n"
-		done
-	done
 	# Ask until you get valid response
-	# YOU WERE HERE YOU WERE HERE YOU WERE HERE YOU WERE HERE YOU WERE HERE YOU WERE HERE 
-	printf "\nWhat would you like to do?\n[A = Install All / E = Install Essential / C = Choose Which To Install / N = Install None] "
-	read USER_INPUT
+	while [ 1 -eq 1 ]
+	do
+		for REPO_TYPE in ESSENTIAL OPTIONAL
+		do
+			echo -e "\n --- $REPO_TYPE Repositories"
+			REPO_VARIABLE="${REPO_TYPE}_REPOS"
+			for REPO in ${!REPO_VARIABLE}
+			do
+				printf "${REPO}\n"
+			done
+		done
+		echo -e "\nWhat would you like to do?"
+		echo "[A = Install All]               [E = Install Essential]"
+		echo "[C = Choose Which To Install]   [N = Install None]"
+		read USER_INPUT
+		printf "\n"
+		if [ "$USER_INPUT" = "a" ] || [ "$USER_INPUT" = "A" ]; then
+			# All git repos are going to be Installed
+			echo Installing all git thingies
+			INSTALL_GIT_REPOS=1
+			break
+		elif [ "$USER_INPUT" = "e" ] || [ "$USER_INPUT" = "E" ]; then
+			#statements
+			echo Intalling essential git repoz
+			INSTALL_GIT_REPOS=2
+			break
+		elif [ "$USER_INPUT" = "c" ] || [ "$USER_INPUT" = "C" ]; then
+			echo Why do you have to be awkward...
+			INSTALL_GIT_REPOS=3
+			break
+		elif [ "$USER_INPUT" = "n" ] || [ "$USER_INPUT" = "N" ]; then
+			echo Not installing git stuff
+			INSTALL_GIT_REPOS=0
+			break
+		else
+			echo Unrecognised user input
+		fi
+	done
+	# If user selected custom, allow them to select the repos
+	if [ ${INSTALL_GIT_REPOS} -eq 3 ]; then
+		$GIT_REPO_LIST=""
+		for REPO_TYPE in ESSENTIAL OPTIONAL; do
+			for REPO in ${!REPO_VARIABLE}; do
+				while [ 1 -eq 1 ]; do
+					printf "\n${REPO}"
+					if [ "${REPO}" = "picotool" ]; then
+						printf " is for controlling the pico from terminal"
+					elif [ "${REPO}" = "pico-sdk" ]; then
+						printf " is essential for compiling C++ code for the pico"
+					elif [ "${REPO}" = "picoprobe" ]; then
+						printf " is for debugging a pico with another pico"
+					fi
+					printf "\nInstall this repo? [Y/n] "
+					read USER_INPUT
+					if [ ${USER_INPUT} = "y" ] || [ ${USER_INPUT} = "Y" ]; then
+						GIT_REPO_LIST="${GIT_REPO_LIST} ${REPO}"
+						break
+					elif [ ${USER_INPUT} = "n" ] || [ ${USER_INPUT} = "N" ]; then
+						break
+					else
+						echo Invalid input
+					fi
+				done
+			done
+		done
+		echo Ill download ${GIT_REPO_LIST}
+	fi
+	if [ ${INSTALL_GIT_REPOS} -ne 0 ]; then
+		if [] # YOU WERE HEREEREREREEEEEEEEEEEEEEEEEEEEEEEEE CHECK FOR CUSTOM INSTALLING PICOTOOL
+		# Ask where to install the repos
+	fi
 else
 	printf "\n${T_RED}WARNING - Git not installed so cannot install repos${T_NOCOLOR}\n"
 fi
@@ -90,9 +147,19 @@ fi
 # Install apt packages
 if [ $INSTALL_APT_PACKAGES -eq 1 ];
 then
-	printf "${T_YELLOW} Installing packages with apt${T_NOCOLOR}\n"
-	# Install things that aren't yet installed
+	printf "${T_BYELLOW} Installing packages with apt${T_NOCOLOR}\n"
+	printf "${T_YELLOW} sudo apt update ${T_NOCOLOR}\n"
 	sudo apt update
-	echo I should install $MISSING_PACKAGES
+	printf "${T_YELLOW} sudo apt install ${MISSING_PACKAGES} ${T_NOCOLOR}\n"
+	echo "I should sudo apt install ${MISSING_PACKAGES}"
 fi
 # Install git repos
+if [ $INSTALL_GIT_REPOS -eq 1 ]; then # Install all
+	printf "${T_BYELLOW}Installing repos with git${T_NOCOLOR}"
+elif [ $INSTALL_GIT_REPOS -eq 2 ]; then # Install essential
+	printf "${T_BYELLOW}Installing repos with git${T_NOCOLOR}"
+
+elif [ $INSTALL_GIT_REPOS -eq 3 ]; then # Install custom
+	printf "${T_BYELLOW}Installing repos with git${T_NOCOLOR}"
+
+fi
