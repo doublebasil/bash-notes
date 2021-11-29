@@ -161,7 +161,7 @@ if command -v "git" >/dev/null 2>&1; then
 				echo "Provide a directory to clone git repos or leave blank to use current directory"
 				read USER_INPUT
 				if [[ -d "${USER_INPUT}" ]]; then
-					GIT_REPO_DESTINATION=USER_INPUT
+					GIT_REPO_DESTINATION=$USER_INPUT
 					break
 				elif [[ ${#USER_INPUT} -eq 0 ]]; then
 					GIT_REPO_DESTINATION=$PWD
@@ -174,7 +174,8 @@ else
 	printf "\n${T_RED}WARNING - Git not installed so cannot install repos${T_NOCOLOR}\n"
 fi
 
-# Now install everything
+# Now begin installing
+
 # Install apt packages
 if [ $INSTALL_APT_PACKAGES -eq 1 ];
 then
@@ -184,13 +185,34 @@ then
 	printf "${T_YELLOW} sudo apt install ${MISSING_PACKAGES} ${T_NOCOLOR}\n"
 	echo "I should sudo apt install ${MISSING_PACKAGES}"
 fi
+
 # Install git repos
-if [ $INSTALL_GIT_REPOS -eq 1 ]; then # Install all
+if [ $INSTALL_GIT_REPOS -ne 0 ]; then
+	GITHUB_PREFIX="https://github.com/raspberrypi/"
+	GITHUB_SUFFIX=".git"
+	SDK_BRANCH="master"
+	if [ $INSTALL_GIT_REPOS -eq 1 ]; then 		# Install all
+		GIT_REPO_LIST="${ESSENTIAL_REPOS} ${OPTIONAL_REPOS}"
+	elif [ $INSTALL_GIT_REPOS -eq 2 ]; then 	# Install essential
+		GIT_REPO_LIST="${ESSENTIAL_REPOS}"
+	fi
 	printf "${T_BYELLOW}Installing repos with git${T_NOCOLOR}\n"
-elif [ $INSTALL_GIT_REPOS -eq 2 ]; then # Install essential
-	printf "${T_BYELLOW}Installing repos with git${T_NOCOLOR}\n"
-
-elif [ $INSTALL_GIT_REPOS -eq 3 ]; then # Install custom
-	printf "${T_BYELLOW}Installing repos with git${T_NOCOLOR}\n"
-
+	printf "${T_YELLOW}Changing directory to ${GIT_REPO_DESTINATION}${T_NOCOLOR}\n"
+	cd "${GIT_REPO_DESTINATION}"
+	for REPO in $GIT_REPO_LIST; do
+		REPO_URL = "${GITHUB_PREFIX}${REPO}${GITHUB_SUFFIX}"
+		if [ "${REPO}" = "pico-sdk" ]; then
+			printf "${T_YELLOW}Cloning pico-sdk master branch${T_NOCOLOR}\n"
+			git clone -b $SKD_BRANCH $REPO_URL
+			printf "${T_RED}You may need to sudo nano ~/.bashrc to change export PICO_SDK_PATH location${T_NOCOLOR}\n"
+			# Next line kinda shows the user if the variable already exists
+			export -p | grep PICO_SDK_PATH
+			printf "${T_YELLOW}Exporting PICO_SDK_PATH variable${T_NOCOLOR}\n"
+			export PICO_SDK_PATH=${PWD}/pico-sdk
+		elif [ "${REPO}" = "picotool" ]; then
+			printf "${T_YELLOW}Cloning picotool${T_NOCOLOR}\n"
+			# Need to move this to
+		fi
+		echo "git clone ${REPO}"
+	done
 fi
